@@ -1,0 +1,17 @@
+---
+# file: roles/opendkim/tasks/main.yml
+# Set up opendkim for use with Postfix
+# Author: Felix Kaechele <felix@fetzig.org>
+
+- name: install opendkim
+  dnf: pkg={{ item }} state=installed
+  with_items:
+    - opendkim
+  tags:
+    - packages
+
+# only enable service for now. it needs further configuration to start
+- name: enable opendkim service
+  service: name=opendkim enabled=yes
+  tags:
+    - service

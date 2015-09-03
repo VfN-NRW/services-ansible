@@ -1,0 +1,25 @@
+---
+# file: services.yml
+- name: reload postfix
+  action: service name=postfix state=reloaded
+
+- name: restart postfix
+  action: service name=postfix state=restarted
+
+- name: restart clamav-milter
+  action: service name=clamav-milter state=restarted
+
+- name: restart clamd@milter
+  action: service name=clamd@milter state=restarted
+
+- name: restart opendkim
+  action: service name=opendkim state=restarted
+
+- name: restart firewall
+  action: service name=firewalld state=restarted
+
+- name: reload dovecot
+  action: service name=dovecot state=reloaded
+
+- name: restart sshd
+  action: service name=sshd state=restarted

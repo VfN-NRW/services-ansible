@@ -1,0 +1,8 @@
+---
+# file: roles/primarymx/tasks/opendkim.yml
+
+- name: install opendkim sign/verify config
+  copy: src=opendkim/opendkim.conf dest=/etc/opendkim.conf
+        owner=root group=root mode=0644 backup=yes
+  notify:
+    - restart opendkim

@@ -1,0 +1,43 @@
+---
+# file: dovecot/main.yml
+- name: Install php and php-fpm
+  dnf: pkg={{ item }} state=installed
+  with_items:
+    - php
+    - php-bcmath
+    - php-fpm
+    - php-gd
+    - php-mbstring
+    - php-mcrypt
+    - php-mysqlnd
+    - php-pdo
+    - php-pecl-memcache
+    - php-pecl-memcached
+  tags:
+    - packages
+
+- name: Download composer
+  shell: curl https://getcomposer.org/composer.phar -o /usr/local/bin/composer
+         creates=/usr/local/bin/composer
+  tags:
+    - composer
+
+- name: Make composer executable
+  file: path=/usr/local/bin/composer
+        owner=root group=root mode=0755
+  tags:
+    - composer
+
+- name: Set correct timezone
+  ini_file: dest=/etc/php.d/timezone.ini
+            section=Date
+            option=date.timezone
+            value={{ timezone }}
+
+#- name: kill default php-fpm pool
+#  file: path=/etc/php-fpm.d/www.conf state=absent
+
+- name: enable and start php-fpm service
+  service: name=php-fpm enabled=yes state=started
+  tags:
+    - service

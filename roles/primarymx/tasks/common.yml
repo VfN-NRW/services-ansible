@@ -1,0 +1,7 @@
+---
+# file: roles/primarymx/tasks/common.yml
+
+- name: Create SELinux file context for mail spool
+  command: semanage fcontext -a -t mail_spool_t "/srv/mail(/.*)?"
+  tags:
+    - selinux

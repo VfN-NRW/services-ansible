@@ -1,0 +1,23 @@
+---
+timezone: Europe/Berlin
+
+vimbadmin_version: 3.0.12
+vimbadmin_hostname: gna.vfn-nrw.de
+vimbadmin_entity_name: VfN NRW e.V.
+
+ssl_host: gna.vfn-nrw.de
+ssl_cert: /etc/pki/tls/private/{{ ssl_host }}.pem
+ssl_key: /etc/pki/tls/private/{{ ssl_host }}.key
+
+mail_ssl_domain: gna.vfn-nrw.de
+mail_hostname: gna.vfn-nrw.de
+mail_primary_domain: vfn-nrw.de
+
+mail_bind_v4: 62.141.34.117
+mail_bind_v6: 2001:4ba0:92f3:300::500	
+
+# Roundcube
+roundcube_imap_server: tls://gna.vfn-nrw.de
+roundcube_smtp_server: tls://gna.vfn-nrw.de
+roundcube_product_name: VfN NRW e.V. Webmail
+roundcube_support_url: https://gna.vfn-nrw.de

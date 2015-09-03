@@ -1,0 +1,5 @@
+---
+# file: role/mariadb/defaults/main.yml
+
+# /root/.my.cnf and setup
+mysql_root_password: "{{ lookup('password', '../../../credentials/' + inventory_hostname + '/mysql_root_password chars=ascii_letters,digits') }}"

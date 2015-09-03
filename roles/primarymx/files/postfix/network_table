@@ -1,0 +1,12 @@
+146.0.36.67/32		OK	# Loki
+188.165.229.219/32	OK	# Ra
+46.38.232.72/32		OK	# Bragi
+
+62.141.34.112/28	OK	# IPv4 myLoc
+2001:4ba0:92f3:300::/56	OK	# IPv6 myLoc
+2001:4ba0:ffed:41::/64	OK	# IPv6 myLoc
+
+2a03:4000:2:453::/64	OK	# IPv6 Netcup
+
+5.135.22.64/28		OK	# IPv4 OVH
+2001:41d0:2:b0db::/64	OK	# IPv6 OVH

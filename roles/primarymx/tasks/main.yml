@@ -1,0 +1,6 @@
+---
+# file: roles/primarymx/tasks/main.yml
+
+- include: common.yml
+- include: postfix.yml
+- include: opendkim.yml

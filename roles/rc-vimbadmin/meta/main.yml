@@ -1,0 +1,6 @@
+---
+# file: roles/rc-vimbadmin/meta/main.yml
+
+dependencies:
+  - { role: roundcube }
+  - { role: vimbadmin }

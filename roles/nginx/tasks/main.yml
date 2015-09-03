@@ -1,0 +1,43 @@
+---
+# role: nginx
+# tasks: main.yml
+
+- name: Install nginx
+  dnf: pkg=nginx state=installed
+
+- name: Enable and start nginx
+  service: name=nginx enabled=yes state=started
+  tags:
+    - service
+
+- name: open firewall ports for HTTP(S)
+  firewalld: service={{ item }} permanent=true state=enabled
+  with_items:
+    - http
+    - https
+  notify:
+    - restart firewall
+
+- name: create nginx php-fpm config
+  copy: src=php-fpm-nginx.conf dest=/etc/php-fpm.d/nginx.conf
+        owner=root group=root mode=0644 backup=yes
+  notify:
+    - restart php-fpm
+
+- name: create nginx php cache dirs
+  file: path={{ item }}
+        owner=root group=nginx mode=0770
+        seuser=system_u serole=object_r setype=httpd_var_run_t
+        state=directory
+  with_items:
+    - /var/lib/php/nginx/session
+    - /var/lib/php/nginx/wsdlcache
+
+- name: apply strong default SSL config
+  template: src=ssl-defaults.conf dest=/etc/nginx/conf.d backup=yes
+  notify:
+    - reload nginx
+
+- name: create nginx dhparams (this will take very long)
+  command: /usr/bin/openssl dhparam -out /etc/pki/tls/private/dhparam-4096.pem 4096
+           creates=/etc/pki/tls/private/dhparam-4096.pem

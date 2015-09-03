@@ -1,0 +1,10 @@
+---
+# file: mailservers.yml
+- hosts: mailservers
+  remote_user: root
+  roles:
+    - { role: common, tags: ['common'] }
+    - { role: ssl, tags: ['ssl'] }
+    - { role: primarymx, tags: ['primarymx'] }
+    - { role: dovecot, tags: ['dovecot'] }
+    - { role: rc-vimbadmin, tags: ['rc-vimbadmin'] }

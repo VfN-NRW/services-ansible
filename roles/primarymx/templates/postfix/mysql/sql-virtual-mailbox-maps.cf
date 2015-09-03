@@ -1,0 +1,5 @@
+user     = {{ mail_db_user }}
+password = {{ mail_db_pass }}
+dbname   = {{ mail_db_name }}
+hosts    = unix:/var/lib/mysql/mysql.sock
+query    = SELECT maildir FROM mailbox WHERE username = '%s' AND active = '1'

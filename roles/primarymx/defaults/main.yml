@@ -1,0 +1,17 @@
+---
+# file: roles/primarymx/defaults/main.yml
+
+db_backend: mysql
+
+mail_db_user: mail
+mail_db_name: mail
+mail_db_pass: "{{ lookup('password', '../../../credentials/' + inventory_hostname + '/mail_db_pass chars=ascii_letters,digits') }}"
+
+mail_ssl_domain: example.com
+
+vmail_dir: /srv/mail
+vmail_user: vmail
+vmail_group: vmail
+
+# Message Size Limit in Megabyte
+message_size_limit: 64

@@ -1,0 +1,129 @@
+---
+# file: roles/vimbadmin/main.yml
+# Set up clamav{,-milter} for use with Postfix
+# Author: Felix Kaechele <felix@fetzig.org>
+
+- name: Ensure git is installed
+  dnf: pkg=git state=installed
+  tags:
+    - packages
+
+- name: Ensure memcached is installed
+  dnf: pkg=memcached state=installed
+  tags:
+    - packages
+
+- name: Enable memcached service
+  service: name=memcached enabled=yes state=started
+  tags:
+    - service
+
+- name: Tell selinux to allow httpd to connect to memcache
+  seboolean: name=httpd_can_network_memcache state=yes persistent=yes
+  tags:
+    - selinux
+
+- name: Tell selinux to allow httpd to send mail
+  seboolean: name=httpd_can_sendmail state=yes persistent=yes
+  tags:
+    - selinux
+
+- name: Install ViMbAdmin "{{ vimbadmin_version }}" from git
+  git: repo=https://github.com/opensolutions/ViMbAdmin.git
+       dest=/usr/share/vimbadmin
+       version={{ vimbadmin_version }}
+
+- name: Install ViMbAdmin dependencies using composer
+  composer: working_dir=/usr/share/vimbadmin no_dev=no optimize_autoloader=yes
+
+- name: create vmail MariaDB database
+  mysql_db: name={{ mail_db_name }} state=present
+  register: createdb_result
+
+- name: create vmail MariaDB user
+  mysql_user: name={{ mail_db_user }} password={{ mail_db_pass }} priv={{ mail_db_name }}.*:ALL state=present
+
+- name: check vmail group
+  group: name={{ vmail_group }} state=present
+  register: group_result
+
+- name: check vmail user
+  user: name={{ vmail_user }} group={{ vmail_group }} home={{ vmail_dir }}
+        shell=/sbin/nologin comment="Virtual maildir handler" system=yes
+        state=present
+  register: user_result
+
+- name: create vimbadmin group
+  group: name=vimbadmin state=present
+
+- name: create vimbadmin user
+  user: name=vimbadmin group=vimbadmin home=/usr/share/vimbadmin
+        shell=/sbin/nologin comment="ViMbAdmin Administrative User" system=yes
+        state=present
+
+- name: Apply configuration template
+  template: src=application.ini
+            dest=/usr/share/vimbadmin/application/configs/application.ini
+            backup=yes
+
+# use cp not mv, otherwise the git repo considers itself
+# modified and updates stop working
+- name: Move htaccess into place
+  shell: cp /usr/share/vimbadmin/public/.htaccess.dist /usr/share/vimbadmin/public/.htaccess
+
+- name: Create database schema
+  shell: bin/doctrine2-cli.php orm:schema-tool:create
+         chdir=/usr/share/vimbadmin/
+  when: createdb_result|changed
+  ignore_errors: yes
+
+- name: Validate database schema
+  shell: bin/doctrine2-cli.php orm:validate-schema
+         chdir=/usr/share/vimbadmin/
+  register: validatedb_result
+  ignore_errors: yes
+
+- name: Update database schema
+  shell: bin/doctrine2-cli.php orm:schema-tool:update --force
+         chdir=/usr/share/vimbadmin/
+  when: validatedb_result|failed
+  ignore_errors: yes
+
+- name: create vimbadmin php-fpm config
+  copy: src=php-fpm-vimbadmin.conf dest=/etc/php-fpm.d/vimbadmin.conf
+        owner=root group=root mode=0644 backup=yes
+  notify:
+    - restart php-fpm
+
+- name: create vimbadmin php cache dirs
+  file: path={{ item }}
+        owner=root group=nginx mode=0770
+        seuser=system_u serole=object_r setype=httpd_var_run_t
+        state=directory
+  with_items:
+    - /var/lib/php/vimbadmin/session
+    - /var/lib/php/vimbadmin/wsdlcache
+
+- name: Ensure ViMbAdmin can write to its working directory
+  file: dest=/usr/share/vimbadmin/var owner=nginx recurse=yes state=directory
+
+- name: Create SELinux file context for ViMbAdmin cache dirs
+  command: semanage fcontext -a -t httpd_var_lib_t "/var/lib/vimbadmin(/.*)?"
+  tags:
+    - selinux
+
+- name: Create SELinux file context for ViMbAdmin log dir
+  command: semanage fcontext -a -t httpd_log_t "/var/log/vimbadmin(/.*)?"
+  tags:
+    - selinux
+
+- name: Create ViMbAdmin cache and log directories
+  file: dest={{ item.path }} owner=vimbadmin recurse=yes state=directory
+        seuser=system_u serole=object_r setype={{ item.setype }}
+  with_items:
+    - { path: /var/log/vimbadmin, setype: httpd_log_t }
+    - { path: /var/lib/vimbadmin/session, setype: httpd_var_lib_t }
+    - { path: /var/lib/vimbadmin/smarty/cache, setype: httpd_var_lib_t }
+    - { path: /var/lib/vimbadmin/smarty/templates_c, setype: httpd_var_lib_t }
+    - { path: /var/lib/vimbadmin/tmp, setype: httpd_var_lib_t }
+

@@ -1,0 +1,6 @@
+---
+# file: roles/spamassassin/handlers/main.yml
+
+- name: run sa-compile
+  action: shell /usr/bin/sa-compile
+  ignore_errors: yes

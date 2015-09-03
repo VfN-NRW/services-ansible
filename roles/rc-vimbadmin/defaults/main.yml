@@ -1,0 +1,10 @@
+---
+# file: roles/rc-vimbadmin/defaults/main.yml
+
+roundcube_db_user: roundcube
+roundcube_db_pass: "{{ lookup('password', '../../../credentials/' + inventory_hostname + '/roundcube_db_pass chars=ascii_letters,digits') }}"
+
+mail_db_name: mail
+
+nginx_ssl_cert: "{{ ssl_cert }}"
+nginx_ssl_key: "{{ ssl_key }}"

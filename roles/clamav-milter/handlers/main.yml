@@ -1,0 +1,5 @@
+- name: restart clamav-milter
+  action: service name=clamav-milter state=restarted
+
+- name: restart clamd@milter
+  action: service name=clamd@milter state=restarted

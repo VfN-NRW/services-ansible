@@ -1,0 +1,7 @@
+- name: copy SSL certificate
+  copy: src={{ ssl_host }}.pem dest=/etc/pki/tls/private/
+        owner=root group=root mode=0644 backup=yes
+
+- name: copy SSL key
+  copy: src={{ ssl_host }}.key dest=/etc/pki/tls/private/
+        owner=root group=root mode=0600 backup=yes

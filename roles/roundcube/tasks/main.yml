@@ -1,0 +1,52 @@
+---
+# file: roles/roundcube/tasks/main.yml
+# Set up Roundcube Webmail
+# Author: Felix Kaechele <felix@fetzig.org>
+
+# we notify php-fpm because roundcube might pull in PHP modules that need loading
+- name: Ensure roundcube is installed
+  dnf: pkg=roundcubemail state=installed
+  tags:
+    - packages
+  notify:
+    - restart php-fpm
+
+- name: Ensure roundcube soft-dependencies are installed
+  dnf: pkg={{ item }} state=installed
+  with_items:
+    - php-pecl-zip
+  tags:
+    - packages
+  notify:
+    - restart php-fpm
+
+- name: Tell selinux to allow httpd to connect to the network to allow for managesieve
+  seboolean: name=httpd_can_network_connect state=yes persistent=yes
+  tags:
+    - selinux
+
+- name: create roundcubemail MariaDB database
+  mysql_db: name={{ roundcube_db_name }} state=present
+  notify:
+    - create roundcube database schema
+
+- name: create roundcube MariaDB user
+  mysql_user: name={{ roundcube_db_user }} password={{ roundcube_db_pass }}
+              priv={{ roundcube_db_name }}.*:ALL state=present
+
+- name: Apply configuration template
+  template: src=config.inc.php
+            dest=/etc/roundcubemail/config.inc.php
+            backup=no mode=0640
+
+- name: fix rc config permissions for nginx
+  file: path=/etc/roundcubemail state=directory
+        owner=root
+        group=nginx
+        recurse=yes
+
+- name: Create roundcube tmp dir
+  file: dest={{ item }} owner=nginx recurse=yes state=directory
+  with_items:
+    - /var/lib/roundcubemail/
+    - /var/log/roundcubemail/

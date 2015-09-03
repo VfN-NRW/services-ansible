@@ -1,0 +1,89 @@
+---
+# file: roles/primarymx/tasks/postfix.yml
+
+- name: install postfix
+  dnf: pkg=postfix state=installed
+  tags:
+    - packages
+
+- name: remove ssmtp
+  dnf: pkg=ssmtp state=absent
+  tags:
+    - packages
+
+- name: install postgrey
+  dnf: pkg=postgrey state=installed
+  tags:
+    - packages
+
+- name: open firewall ports for imap, smtps, submission
+  firewalld: port={{ item }}/tcp permanent=true state=enabled
+  with_items:
+    - 25
+    - 465
+    - 587
+  notify:
+    - restart firewall
+
+- name: install additional postfix configuration files
+  copy: src=postfix/{{ item }}
+        dest=/etc/postfix/{{ item }}
+        owner=root group=root mode=0644 backup=yes
+  with_items:
+    - network_table
+    - outgoing_mail_header_filters
+    - reject_bogus_ip.cidr
+  notify:
+    - reload postfix
+
+#- name: install header_checks
+#  copy: src=header_checks
+#        dest=/etc/postfix/header_checks
+#        owner=root group=root mode=0644
+#  notify: reload postfix
+#  tags:
+#    - antispam
+
+- name: create vmail group
+  group: name={{ vmail_group }} state=present
+  register: group_result
+
+- name: create vmail user
+  user: name={{ vmail_user }} group={{ vmail_group }} home={{ vmail_dir }}
+        shell=/sbin/nologin comment="Virtual maildir handler" system=yes
+        state=present
+  register: user_result
+
+- name: gather vmail uid/gid
+  set_fact:
+    vmail_gid: "{{ group_result.gid }}"
+    vmail_uid: "{{ user_result.uid }}"
+
+- name: install postfix config templates
+  template: src=postfix/{{ item }} dest=/etc/postfix backup=yes
+  with_items:
+    - main.cf
+    - master.cf
+    - "{{ db_backend }}/sql-virtual-alias-maps.cf"
+    - "{{ db_backend }}/sql-virtual-domains-maps.cf"
+    - "{{ db_backend }}/sql-virtual-mailbox-maps.cf"
+    - "{{ db_backend }}/sql-virtual-transport-maps.cf"
+  notify:
+    - reload postfix
+
+- name: create various initial empty files
+  file: path={{ item.path }} owner={{ item.owner }} group={{ item.owner }} state=touch
+  with_items:
+    - { path: /etc/postfix/postscreen_access.cidr, owner: root }
+    - { path: /var/lib/postfix/smtpd_scache, owner: postfix }
+    - { path: /var/lib/postfix/smtp_scache, owner: postfix }
+
+- name: enable and start postgrey
+  service: name=postgrey enabled=yes state=started
+  tags:
+    - service
+
+- name: enable and start postfix
+  service: name=postfix enabled=yes state=started
+  tags:
+    - service

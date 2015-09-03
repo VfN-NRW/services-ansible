@@ -1,0 +1,8 @@
+---
+# file: role/nginx/defaults/main.yml
+
+# nginx.conf
+nginx_ssl_cert: "{{ ssl_cert }}"
+nginx_ssl_key: "{{ ssl_key }}"
+
+dhparam_path: /etc/pki/tls/private/dhparam-4096.pem

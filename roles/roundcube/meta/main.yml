@@ -1,0 +1,7 @@
+---
+# file: roundcube/meta/main.yml
+
+dependencies:
+  - { role: mariadb }
+  - { role: php }
+  - { role: nginx, tags: ['nginx']}

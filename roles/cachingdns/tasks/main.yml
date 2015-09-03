@@ -1,0 +1,14 @@
+---
+# file: roles/cachingdns/tasks/main.yml
+# Set up unbound as caching and DNSSEC validating DNS server
+# Author: Felix Kaechele <felix@fetzig.org>
+
+- name: Install unbound
+  dnf: pkg=unbound state=installed
+  tags:
+    - packages
+
+- name: enable and start unbound
+  service: name=unbound enabled=yes state=started
+  tags:
+    - services

@@ -1,0 +1,50 @@
+---
+# file: roles/spamassassin/tasks/main.yml
+
+- name: install SpamAssassin incl. soft deps
+  dnf: pkg={{ item }} state=installed
+  with_items:
+    - gcc
+    - GeoIP-update
+    - GeoIP-update6
+    - perl-Geo-IP
+    - perl-Razor-Agent
+    - pyzor
+    - spamass-milter-postfix
+    - spamassassin-iXhash2
+    - re2c
+  tags:
+    - packages
+
+- name: run pyzor discover
+  command: /usr/bin/pyzor discover
+  tags:
+    - sa-update
+
+- name: create razor settings dir for root
+  file: path={{ item }}
+        owner=root group=root mode=0700
+        seuser=unconfined_u serole=object_r setype=spamc_home_t
+        state=directory
+  with_items:
+    - /root/.razor
+
+- name: run sa-update
+  shell: /usr/bin/sa-update -D
+  tags:
+    - sa-update
+  register: saupdate_result
+  changed_when: "saupdate_result.rc == 0"
+  failed_when: "saupdate_result.rc >= 4"
+  notify:
+    - run sa-compile
+
+- name: enable and start spamassassin
+  service: name=spamassassin enabled=yes state=started
+  tags:
+    - service
+
+- name: enable and start spamass-milter
+  service: name=spamass-milter enabled=yes state=started
+  tags:
+    - service

@@ -1,0 +1,5 @@
+---
+# file: roles/roundcube/handlers/main.yml
+- name: create roundcube database schema
+  mysql_db: name={{ roundcube_db_name }} state=import
+            target=/usr/share/roundcubemail/SQL/mysql.initial.sql
