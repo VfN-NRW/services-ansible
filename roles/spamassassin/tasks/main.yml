@@ -16,6 +16,13 @@
   tags:
     - packages
 
+- name: install local spamassassin configuration file
+  copy: src=local.cf
+        dest=/etc/mail/spamassassin/local.cf
+        owner=root group=root mode=0644 backup=yes
+  notify:
+    - restart spamassassin
+
 - name: run pyzor discover
   command: /usr/bin/pyzor discover
   tags:

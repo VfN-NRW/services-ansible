@@ -4,3 +4,6 @@
 - name: run sa-compile
   action: shell /usr/bin/sa-compile
   ignore_errors: yes
+
+- name: restart spamassassin
+  service: name=spamassassin state=restarted
