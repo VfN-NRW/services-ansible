@@ -172,14 +172,30 @@ header_checks = pcre:/etc/postfix/header_checks
 # ---------------------------------------
 postscreen_access_list = permit_mynetworks,
         cidr:/etc/postfix/postscreen_access.cidr
-postscreen_dnsbl_threshold = 2
-postscreen_dnsbl_sites = b.barracudacentral.org, zen.spamhaus.org, psbl.surriel.com*2, ix.dnsbl.manitu.net*2, list.dnswl.org*-5
+postscreen_dnsbl_threshold = 3
+postscreen_dnsbl_sites =
+  zen.spamhaus.org*3
+  bl.mailspike.net*3
+  b.barracudacentral.org*2
+  bl.spameatingmonkey.net
+  bl.spamcop.net
+  dnsbl.sorbs.net=127.0.0.[2;3;6;7;10]
+  ix.dnsbl.manitu.net
+  bl.blocklist.de
+  #whitelist
+  list.dnswl.org=127.0.[0..255].0*-1
+  list.dnswl.org=127.0.[0..255].1*-2
+  list.dnswl.org=127.0.[0..255].[2..3]*-3
+  iadb.isipp.com=127.0.[0..255].[0..255]*-2
+  iadb.isipp.com=127.3.100.[6..200]*-2
+  wl.mailspike.net=127.0.0.[17;18]*-1
+  wl.mailspike.net=127.0.0.[19;20]*-2
 postscreen_dnsbl_action = enforce
 postscreen_greet_action = enforce
-postscreen_greet_banner = 220-$myhostname
 
 # Milters
 # ---------------------------------------
+milter_connect_macros = j {daemon_name} v {if_name} _
 milter_default_action = accept
 smtpd_milters = unix:/run/spamass-milter/postfix/sock unix:/run/clamav-milter/clamav-milter.socket inet:localhost:8891
 non_smtpd_milters = unix:/run/clamav-milter/clamav-milter.socket inet:localhost:8891
