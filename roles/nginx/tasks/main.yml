@@ -2,8 +2,11 @@
 # role: nginx
 # tasks: main.yml
 
+- name: Enable nginx-mainline repo
+  shell: dnf -y copr enable heffer/nginx-mainline
+
 - name: Install nginx
-  dnf: pkg=nginx state=installed
+  dnf: pkg=nginx-mainline state=installed
 
 - name: Enable and start nginx
   service: name=nginx enabled=yes state=started
