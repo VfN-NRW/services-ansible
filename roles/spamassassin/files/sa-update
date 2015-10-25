@@ -1,0 +1,10 @@
+#!/bin/sh
+
+/usr/share/spamassassin/sa-update.cron
+sastatus=$?
+/usr/bin/sa-update --nogpg --channel spamassassin.heinlein-support.de
+hsstatus=$?
+
+if [ $sastatus -eq 0 ] || [ $hsstatus -eq 0 ]; then
+    /usr/bin/sa-compile
+fi

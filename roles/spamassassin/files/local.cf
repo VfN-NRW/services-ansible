@@ -18,7 +18,8 @@ dns_server 127.0.0.1
 ## MSPIKE Configuration
 
 # Spam sources
-header __RCVD_IN_MSPIKE eval:check_rbl('mspike-lastexternal', 'bl.mailspike.net.') tflags __RCVD_IN_MSPIKE net 
+header __RCVD_IN_MSPIKE eval:check_rbl('mspike-lastexternal', 'bl.mailspike.net.')
+tflags __RCVD_IN_MSPIKE net
 
 # Bad senders
 header __RCVD_IN_MSPIKE_Z eval:check_rbl_sub('mspike-lastexternal', '^127\.0\.0\.2$')

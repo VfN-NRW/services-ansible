@@ -7,7 +7,10 @@
     - gcc
     - GeoIP-update
     - GeoIP-update6
+    - perl-ExtUtils-MakeMaker
     - perl-Geo-IP
+    - perl-Net-DNS-Nameserver
+    - perl-Net-Patricia
     - perl-Razor-Agent
     - pyzor
     - spamass-milter-postfix
@@ -36,13 +39,39 @@
   with_items:
     - /root/.razor
 
-- name: run sa-update
-  shell: /usr/bin/sa-update -D
+- name: install zmi rules
+  copy: src=zmi.conf
+        dest=/etc/mail/spamassassin/channel.d/zmi.conf
+        owner=root group=root mode=0644 backup=yes
   tags:
     - sa-update
-  register: saupdate_result
-  changed_when: "saupdate_result.rc == 0"
-  failed_when: "saupdate_result.rc >= 4"
+
+- name: install sa-update cron script
+  copy: src=sa-update
+        dest=/etc/cron.hourly/sa-update
+        owner=root group=root mode=0755 backup=yes
+
+- name: prevent sa-update script from sleeping
+  lineinfile: dest=/usr/share/spamassassin/sa-update.cron state=absent
+              regexp="^sleep"
+
+- name: run sa-update for stock channels
+  shell: /usr/share/spamassassin/sa-update.cron
+  tags:
+    - sa-update
+  register: saupdate_stock_result
+  changed_when: "saupdate_stock_result.rc == 0"
+  failed_when: "saupdate_stock_result.rc >= 4"
+  notify:
+    - run sa-compile
+
+- name: run sa-update for heinlein channel
+  shell: /usr/bin/sa-update --nogpg --channel spamassassin.heinlein-support.de
+  tags:
+    - sa-update
+  register: saupdate_heinlein_result
+  changed_when: "saupdate_heinlein_result.rc == 0"
+  failed_when: "saupdate_heinlein_result.rc >= 4"
   notify:
     - run sa-compile
 
