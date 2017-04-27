@@ -3,45 +3,67 @@
 
 - name: Run dnf makecache
   command: /usr/bin/dnf makecache
+  tags:
+    - 'skip_ansible_lint'
 
 - name: Install common packages
-  dnf: pkg={{ item }} state=installed
+  package:
+    name: "{{ item }}"
+    state: 'installed'
   with_items:
-    - bash-completion
-    - haveged
-    - libsemanage-python
-    - mosh
-    - policycoreutils
-    - policycoreutils-python
-    - vim-enhanced
-    - yum-cron
-    - yum-cron-security
-    - yum-plugin-fastestmirror
+    - 'bash-completion'
+    - 'haveged'
+    - 'libsemanage-python'
+    - 'mosh'
+    - 'policycoreutils'
+    - 'policycoreutils-python'
+    - 'vim-enhanced'
+    - 'yum-cron'
+    - 'yum-cron-security'
+    - 'yum-plugin-fastestmirror'
   tags:
-    - packages
+    - 'packages'
 
 - name: make sure firewalld is started
-  service: name=firewalld enabled=yes state=started
+  service:
+    name: 'firewalld'
+    enabled: yes
+    state: 'started'
   tags:
-    - service
+    - 'service'
 
 - name: enable and start haveged
-  service: name=haveged enabled=yes state=started
+  service:
+    name: 'haveged'
+    enabled: yes
+    state: 'started'
   tags:
-    - service
+    - 'service'
 
 - name: open firewall ports for mosh
-  firewalld: port=60000-61000/udp permanent=true state=enabled
+  firewalld:
+    port: '60000-61000/udp'
+    permanent: true
+    state: 'enabled'
   tags:
-    - firewall
+    - 'firewall'
   notify:
-    - restart firewall
+    - 'restart firewall'
 
 - name: disallow password login into ssh
-  lineinfile: dest=/etc/ssh/sshd_config regexp="^PasswordAuthentication"
-              line="PasswordAuthentication no" state=present
+  lineinfile:
+    dest: '/etc/ssh/sshd_config'
+    regexp: "^PasswordAuthentication"
+    line: "PasswordAuthentication no"
+    state: 'present'
   notify:
-    - restart sshd
+    - 'restart sshd'
 
 - name: send root's email to felix@fetzig.org
-  lineinfile: "dest=/etc/aliases regexp='^root:' line='root:		felix@fetzig.org' state=present"
+  lineinfile:
+    dest: '/etc/aliases'
+    regexp: '^root\:'
+    line: 'root:felix@fetzig.org'
+    state: 'present'
+  notify:
+    - 'update aliases'

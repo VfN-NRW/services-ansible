@@ -1,3 +1,46 @@
 ---
-# file: main.yml
-- include: services.yml
+
+- name: update aliases
+  command: '/usr/bin/newaliases'
+  tags:
+    - 'skip_ansible_lint'
+
+- name: reload postfix
+  service:
+    name: 'postfix'
+    state: 'reloaded'
+
+- name: restart postfix
+  service:
+    name: 'postfix'
+    state: 'restarted'
+
+- name: restart clamav-milter
+  service:
+    name: 'clamav-milter'
+    state: 'restarted'
+
+- name: restart clamd@milter
+  service:
+    name: 'clamd@milter'
+    state: 'restarted'
+
+- name: restart opendkim
+  service:
+    name: 'opendkim'
+    state: 'restarted'
+
+- name: restart firewall
+  service:
+    name: 'firewalld'
+    state: 'restarted'
+
+- name: reload dovecot
+  service:
+    name: 'dovecot'
+    state: 'reloaded'
+
+- name: restart sshd
+  service:
+    name: 'sshd'
+    state: 'restarted'
