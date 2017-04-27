@@ -4,11 +4,16 @@
 # Author: Felix Kaechele <felix@fetzig.org>
 
 - name: Install unbound
-  dnf: pkg=unbound state=installed
+  package:
+    name: 'unbound'
+    state: 'present'
   tags:
-    - packages
+    - 'packages'
 
 - name: enable and start unbound
-  service: name=unbound enabled=yes state=started
+  service:
+    name: 'unbound'
+    enabled: yes
+    state: 'started'
   tags:
-    - services
+    - 'services'
