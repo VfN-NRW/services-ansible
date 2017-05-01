@@ -4,80 +4,131 @@
 # Author: Felix Kaechele <felix@fetzig.org>
 
 - name: install ClamAV and milter
-  dnf: pkg={{ item }} state=installed
+  package:
+    name: "{{ item }}"
+    state: 'installed'
   with_items:
-    - clamav-milter
-    - clamav-server-systemd
-    - clamav-update
+    - 'clamav-milter'
+    - 'clamav-server-systemd'
+    - 'clamav-update'
   tags:
-    - packages
+    - 'packages'
 
 - name: set seboolean for clamav jit
-  seboolean: name=antivirus_use_jit state=yes persistent=yes
+  seboolean:
+    name: 'antivirus_use_jit'
+    state: yes
+    persistent: yes
   tags:
-    - selinux
+    - 'selinux'
 
 - name: configure clamd service for clamav-milter
-  copy: src=milter.conf dest=/etc/clamd.d/milter.conf
-        owner=root group=root mode=0644 backup=yes
+  copy:
+    src: 'milter.conf'
+    dest: '/etc/clamd.d/milter.conf'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+    backup: yes
 
 - name: create directory for clamd socket
-  file: path=/run/clamd-milter
-        owner=clamilt group=postfix mode=0710
-        seuser=system_u serole=object_r setype=antivirus_var_run_t
-        state=directory
+  file:
+    path: '/run/clamd-milter'
+    owner: 'clamilt'
+    group: 'postfix'
+    mode: '0710'
+    seuser: 'system_u'
+    serole: 'object_r'
+    setype: 'antivirus_var_run_t'
+    state: 'directory'
 
 - name: make clamd socket dir known to systemd
-  copy: src=tmpfilesd-clamd-milter.conf
-        dest=/etc/tmpfiles.d/clamd-milter.conf
-        owner=root group=root mode=0644 backup=no
+  copy:
+    src: 'tmpfilesd-clamd-milter.conf'
+    dest: 'etc/tmpfiles.d/clamd-milter.conf'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+    backup: no
 
 - name: enable clamd service for clamav-milter
-  file: src=/usr/lib/systemd/system/clamd@.service
-        dest=/etc/systemd/system/multi-user.target.wants/clamd@milter.service
-        state=link
+  file:
+    src: '/usr/lib/systemd/system/clamd@.service'
+    dest: '/etc/systemd/system/multi-user.target.wants/clamd@milter.service'
+    state: 'link'
   tags:
-    - service
+    - 'service'
 
 - name: start clamd service for clamav-milter
-  service: name=clamd@milter enabled=yes state=started
+  service:
+    name: 'clamd@milter'
+    enabled: yes
+    state: 'started'
   tags:
-    - service
+    - 'service'
 
 - name: configure clamav-milter for postfix
-  copy: src=clamav-milter.conf dest=/etc/mail/clamav-milter.conf
-        owner=root group=root mode=0644
+  copy:
+    src: 'clamav-milter.conf'
+    dest: '/etc/mail/clamav-milter.conf'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
 
 - name: fix clamav-milter socket dir permissions
-  file: path=/run/clamav-milter
-        owner=clamilt group=postfix mode=0710
-        seuser=system_u serole=object_r setype=antivirus_var_run_t
-        state=directory
+  file:
+    path: '/run/clamav-milter'
+    owner: 'clamilt'
+    group: 'postfix'
+    mode: '0710'
+    seuser: 'system_u'
+    serole: 'object_r'
+    setype: 'antivirus_var_run_t'
+    state: 'directory'
 
 - name: make clamav-milter permissions fix persist
-  copy: src=tmpfilesd-clamav-milter.conf
-        dest=/etc/tmpfiles.d/clamav-milter.conf
-        owner=root group=root mode=0644 backup=no
+  copy:
+    src: 'tmpfilesd-clamav-milter.conf'
+    dest: '/etc/tmpfiles.d/clamav-milter.conf'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+    backup: no
 
 # to be able to chown the socket file to the postfix group clamilt needs to be
 # part of that group as well
 - name: add clamilt to postfix group
-  user: name=clamilt groups=postfix append=yes
+  user:
+    name: 'clamilt'
+    groups: 'postfix'
+    append: yes
   tags:
-    - users
+    - 'users'
 
 - name: enable clamav-milter service
-  service: name=clamav-milter enabled=yes state=started
+  service:
+    name: 'clamav-milter'
+    enabled: yes
+    state: 'started'
   tags:
-    - service
+    - 'service'
 
 - name: enable freshclam
-  lineinfile: dest=/etc/sysconfig/freshclam state=absent
-              regexp="^FRESHCLAM_DELAY"
+  lineinfile:
+    dest: '/etc/sysconfig/freshclam'
+    regexp: "^FRESHCLAM_DELAY"
+    state: 'absent'
 
 - name: configure freshclam for postfix
-  copy: src=freshclam.conf dest=/etc/freshclam.conf
-        owner=root group=root mode=0644 backup=yes
+  copy:
+    src: 'freshclam.conf'
+    dest: '/etc/freshclam.conf'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+    backup: yes
 
 - name: run freshclam
   command: /usr/bin/freshclam
+  tags:
+    - 'skip_ansible_lint'
