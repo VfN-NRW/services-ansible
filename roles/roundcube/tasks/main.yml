@@ -5,48 +5,68 @@
 
 # we notify php-fpm because roundcube might pull in PHP modules that need loading
 - name: Ensure roundcube is installed
-  dnf: pkg=roundcubemail state=installed
+  dnf:
+    pkg: 'roundcubemail'
+    state: 'installed'
   tags:
-    - packages
+    - 'packages'
   notify:
-    - restart php-fpm
+    - 'restart php-fpm'
 
 - name: Ensure roundcube soft-dependencies are installed
-  dnf: pkg={{ item }} state=installed
+  dnf:
+    pkg: "{{ item }}"
+    state: 'installed'
   with_items:
-    - php-pecl-zip
+    - 'php-pecl-zip'
   tags:
-    - packages
+    - 'packages'
   notify:
-    - restart php-fpm
+    - 'restart php-fpm'
 
 - name: Tell selinux to allow httpd to connect to the network to allow for managesieve
-  seboolean: name=httpd_can_network_connect state=yes persistent=yes
+  seboolean:
+    name: 'httpd_can_network_connect'
+    state: yes
+    persistent: yes
   tags:
-    - selinux
+    - 'selinux'
 
 - name: create roundcubemail MariaDB database
-  mysql_db: name={{ roundcube_db_name }} state=present
+  mysql_db:
+    name: "{{ roundcube_db_name }}"
+    state: 'present'
   notify:
-    - create roundcube database schema
+    - 'create roundcube database schema'
 
 - name: create roundcube MariaDB user
-  mysql_user: name={{ roundcube_db_user }} password={{ roundcube_db_pass }}
-              priv={{ roundcube_db_name }}.*:ALL state=present
+  mysql_user:
+    name: "{{ roundcube_db_user }}"
+    password: "{{ roundcube_db_pass }}"
+    priv: "{{ roundcube_db_name }}.*:ALL"
+    state: 'present'
 
 - name: Apply configuration template
-  template: src=config.inc.php
-            dest=/etc/roundcubemail/config.inc.php
-            backup=no mode=0640
+  template:
+    src: 'config.inc.php'
+    dest: '/etc/roundcubemail/config.inc.php'
+    mode: '0640'
+    backup: no
 
 - name: fix rc config permissions for nginx
-  file: path=/etc/roundcubemail state=directory
-        owner=root
-        group=nginx
-        recurse=yes
+  file:
+    path: '/etc/roundcubemail'
+    state: 'directory'
+    owner: 'root'
+    group: 'nginx'
+    recurse: yes
 
 - name: Create roundcube tmp dir
-  file: dest={{ item }} owner=nginx recurse=yes state=directory
+  file:
+    dest: "{{ item }}"
+    owner: 'nginx'
+    recurse: yes
+    state: 'directory'
   with_items:
-    - /var/lib/roundcubemail/
-    - /var/log/roundcubemail/
+    - '/var/lib/roundcubemail/'
+    - '/var/log/roundcubemail/'

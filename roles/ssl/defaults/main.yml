@@ -1,4 +1,4 @@
 ---
 # file: role/ssl/defaults/main.yml
 
-ssl_host: example.com
+ssl_host: 'example.com'

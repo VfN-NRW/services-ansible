@@ -2,11 +2,11 @@
 # file: role/dovecot/defaults/main.yml
 
 # 10-mail.conf
-dovecot_mail_attachment_dir: /srv/mail/attachments
-mail_plugins_global: fts fts_lucene quota zlib
+dovecot_mail_attachment_dir: '/srv/mail/attachments'
+mail_plugins_global: 'fts fts_lucene quota zlib'
 
-vmail_group: vmail
-vmail_user: vmail
+vmail_group: 'vmail'
+vmail_user: 'vmail'
 
 # 10-ssl.conf
 dovecot_ssl_cert: "{{ ssl_cert }}"
@@ -14,13 +14,13 @@ dovecot_ssl_key: "{{ ssl_key }}"
 
 # 20-imap.conf
 dovecot_max_connections: 20
-mail_plugins_imap: $mail_plugins imap_zlib
+mail_plugins_imap: '$mail_plugins imap_zlib'
 
 # dovecot-sql.conf.ext
-mail_db_backend: mysql
-dovecot_pass_scheme: SSHA512
+mail_db_backend: 'mysql'
+dovecot_pass_scheme: 'SSHA512'
 
-mail_db_host: localhost
-mail_db_user: mail
+mail_db_host: 'localhost'
+mail_db_user: 'mail'
 mail_db_pass: "{{ lookup('password', '../../../credentials/' + inventory_hostname + '/mail_db_pass chars=ascii_letters,digits') }}"
-mail_db_name: mail
+mail_db_name: 'mail'

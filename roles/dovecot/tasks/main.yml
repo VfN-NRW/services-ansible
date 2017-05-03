@@ -1,54 +1,77 @@
 ---
 # file: dovecot/main.yml
 - name: install dovecot
-  dnf: pkg={{ item }} state=installed
+  dnf:
+    pkg: "{{ item }}"
+    state: 'installed'
   with_items:
-    - dovecot-pigeonhole
-    - dovecot-mysql
-    - dovecot
+    - 'dovecot-pigeonhole'
+    - 'dovecot-mysql'
+    - 'dovecot'
   tags:
-    - packages
+    - 'packages'
 
 - name: open firewall ports for imap(s)
-  firewalld: port={{ item }}/tcp permanent=true state=enabled
+  firewalld:
+    port: "{{ item }}/tcp"
+    permanent: 'true'
+    state: 'enabled'
   with_items:
     - 143
     - 993
     - 4190
   notify:
-    - restart firewall
+    - 'restart firewall'
 
 - name: copy local configuration
-  copy: src=local.conf dest=/etc/dovecot/
-        owner=root group=root mode=0644 backup=yes
+  copy:
+    src: 'local.conf'
+    dest: '/etc/dovecot/'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+    backup: yes
   notify:
-    - reload dovecot
+    - 'reload dovecot'
 
 - name: copy static configuration fragments
-  copy: src=conf.d/{{ item }} dest=/etc/dovecot/conf.d/
-        owner=root group=root mode=0644 backup=yes
+  copy:
+    src: "conf.d/{{ item }}"
+    dest: '/etc/dovecot/conf.d/'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+    backup: yes
   with_items:
-    - 10-auth.conf
-    - 10-master.conf
-    - 15-lda.conf
-    - 15-mailboxes.conf
-    - 20-managesieve.conf
-    - auth-sql.conf.ext
+    - '10-auth.conf'
+    - '10-master.conf'
+    - '15-lda.conf'
+    - '15-mailboxes.conf'
+    - '20-managesieve.conf'
+    - 'auth-sql.conf.ext'
   notify:
-    - reload dovecot
+    - 'reload dovecot'
 
 - name: create dynamic configuration fragments
-  template: src={{ item }} dest=/etc/dovecot/{{ item }}
-            owner=root group=root mode=0644 backup=yes
+  template:
+    src: "{{ item }}"
+    dest: "/etc/dovecot/{{ item }}"
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+    backup: yes
   with_items:
-    - conf.d/10-mail.conf
-    - conf.d/10-ssl.conf
-    - conf.d/20-imap.conf
-    - dovecot-sql.conf.ext
+    - 'conf.d/10-mail.conf'
+    - 'conf.d/10-ssl.conf'
+    - 'conf.d/20-imap.conf'
+    - 'dovecot-sql.conf.ext'
   notify:
-    - reload dovecot
+    - 'reload dovecot'
 
 - name: enable and start dovecot
-  service: name=dovecot enabled=yes state=started
+  service:
+    name: 'dovecot'
+    enabled: yes
+    state: 'started'
   tags:
-    - service
+    - 'service'

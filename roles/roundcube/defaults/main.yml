@@ -1,9 +1,9 @@
 ---
 # file: roles/roundcube/defaults/main.yml
 
-roundcube_db_host: localhost
-roundcube_db_name: roundcubemail
-roundcube_db_user: roundcube
+roundcube_db_host: 'localhost'
+roundcube_db_name: 'roundcubemail'
+roundcube_db_user: 'roundcube'
 roundcube_db_pass: "{{ lookup('password', '../../../credentials/' + inventory_hostname + '/roundcube_db_pass chars=ascii_letters,digits') }}"
 
 roundcube_smtp_server: 'localhost'
@@ -12,5 +12,5 @@ roundcube_managesieve_server: "{{ roundcube_imap_server }}"
 roundcube_smtp_port: 587
 roundcube_smtp_user: '%u'
 roundcube_smtp_pass: '%p'
-roundcube_support_url:
-roundcube_product_name: Roundcube Webmail
+roundcube_support_url: ''
+roundcube_product_name: 'Roundcube Webmail'

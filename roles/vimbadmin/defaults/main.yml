@@ -1,12 +1,12 @@
 ---
 # file: role/vimbadmin/defaults/main.yml
 
-mail_db_name: mail
-mail_db_user: mail
+mail_db_name: 'mail'
+mail_db_user: 'mail'
 mail_db_pass: "{{ lookup('password', '../../../credentials/' + inventory_hostname + '/mail_db_pass chars=ascii_letters,digits') }}"
 
-vmail_user: vmail
-vmail_group: vmail
+vmail_user: 'vmail'
+vmail_group: 'vmail'
 
 vimbadmin_securitysalt: "{{ lookup('password', '../../../credentials/' + inventory_hostname + '/vimbadmin_securitysalt chars=ascii_letters,digits,punctuation length=64') }}"
 vimbadmin_remembermesalt: "{{ lookup('password', '../../../credentials/' + inventory_hostname + '/vimbadmin_remembermesalt chars=ascii_letters,digits,punctuation length=64') }}"

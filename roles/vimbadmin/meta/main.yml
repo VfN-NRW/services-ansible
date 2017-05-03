@@ -2,6 +2,6 @@
 # file: vimbadmin/meta/main.yml
 
 dependencies:
-  - { role: mariadb }
-  - { role: php }
-  - { role: nginx }
+  - { role: 'mariadb' }
+  - { role: 'php' }
+  - { role: 'nginx' }
