@@ -2,4 +2,4 @@
 # file: roles/spamassassin/meta/main.yml
 
 dependencies:
-  - { role: cachingdns }
+  - { role: 'cachingdns' }

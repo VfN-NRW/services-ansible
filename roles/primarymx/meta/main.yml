@@ -2,7 +2,7 @@
 # file: roles/primarymx/meta/main.yml
 
 dependencies:
-  - { role: cachingdns }
-  - { role: spamassassin }
-  - { role: clamav-milter }
-  - { role: opendkim }
+  - { role: 'cachingdns' }
+  - { role: 'spamassassin' }
+  - { role: 'clamav-milter' }
+  - { role: 'opendkim' }

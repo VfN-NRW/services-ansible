@@ -3,13 +3,19 @@
 # Glue for RoundCube and ViMbAdmin
 
 - name: apply rc-vimbadmin nginx config
-  template: src=roundcube+vimbadmin.conf dest=/etc/nginx/conf.d backup=no
+  template:
+    src: 'roundcube+vimbadmin.conf'
+    dest: '/etc/nginx/conf.d'
+    backup: no
   notify:
-    - reload nginx
+    - 'reload nginx'
 
-#- name: allow roundcube MariaDB user to update mailbox passwords (user self-service)
-#  mysql_user: name={{ roundcube_db_user }} password={{ roundcube_db_pass }}
-#              priv={{ mail_db_name }}.mailbox:SELECT(username),UPDATE(password)
-#              append_privs=yes state=present
-#  tags:
-#    - mysql
+# - name: allow roundcube MariaDB user to update mailbox passwords (user self-service)
+#   mysql_user:
+#     name: "{{ roundcube_db_user }}"
+#     password: "{{ roundcube_db_pass }}"
+#     priv: "{{ mail_db_name }}.mailbox:SELECT(username),UPDATE(password)"
+#     append_privs: yes
+#     state: 'present'
+#   tags:
+#    - 'mysql'

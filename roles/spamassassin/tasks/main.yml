@@ -2,85 +2,115 @@
 # file: roles/spamassassin/tasks/main.yml
 
 - name: install SpamAssassin incl. soft deps
-  dnf: pkg={{ item }} state=installed
+  dnf:
+    pkg: "{{ item }}"
+    state: 'installed'
   with_items:
-    - gcc
-    - GeoIP-update
-    - GeoIP-update6
-    - perl-ExtUtils-MakeMaker
-    - perl-Geo-IP
-    - perl-Net-DNS-Nameserver
-    - perl-Net-Patricia
-    - perl-Razor-Agent
-    - pyzor
-    - spamass-milter-postfix
-    - spamassassin-iXhash2
-    - re2c
+    - 'gcc'
+    - 'GeoIP-update'
+    - 'GeoIP-update6'
+    - 'perl-ExtUtils-MakeMaker'
+    - 'perl-Geo-IP'
+    - 'perl-Net-DNS-Nameserver'
+    - 'perl-Net-Patricia'
+    - 'perl-Razor-Agent'
+    - 'pyzor'
+    - 'spamass-milter-postfix'
+    - 'spamassassin-iXhash2'
+    - 're2c'
   tags:
-    - packages
+    - 'packages'
 
 - name: install local spamassassin configuration file
-  copy: src=local.cf
-        dest=/etc/mail/spamassassin/local.cf
-        owner=root group=root mode=0644 backup=yes
+  copy:
+    src: 'local.cf'
+    dest: '/etc/mail/spamassassin/local.cf'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+    backup: yes
   notify:
-    - restart spamassassin
+    - 'restart spamassassin'
 
 - name: run pyzor discover
-  command: /usr/bin/pyzor discover
+  command: '/usr/bin/pyzor discover'
   tags:
-    - sa-update
+    - 'sa-update'
+    - 'skip_ansible_lint'
 
 - name: create razor settings dir for root
-  file: path={{ item }}
-        owner=root group=root mode=0700
-        seuser=unconfined_u serole=object_r setype=spamc_home_t
-        state=directory
+  file:
+    path: "{{ item }}"
+    owner: 'root'
+    group: 'root'
+    mode: '0700'
+    seuser: 'unconfined_u'
+    serole: 'object_r'
+    setype: 'spamc_home_t'
+    state: 'directory'
   with_items:
-    - /root/.razor
+    - '/root/.razor'
 
 - name: install zmi rules
-  copy: src=zmi.conf
-        dest=/etc/mail/spamassassin/channel.d/zmi.conf
-        owner=root group=root mode=0644 backup=yes
+  copy:
+    src: 'zmi.conf'
+    dest: '/etc/mail/spamassassin/channel.d/zmi.conf'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+    backup: yes
   tags:
-    - sa-update
+    - 'sa-update'
 
 - name: install sa-update cron script
-  copy: src=sa-update
-        dest=/etc/cron.hourly/sa-update
-        owner=root group=root mode=0755 backup=yes
+  copy:
+    src: 'sa-update'
+    dest: '/etc/cron.hourly/sa-update'
+    owner: 'root'
+    group: 'root'
+    mode: '0755'
+    backup: yes
 
 - name: prevent sa-update script from sleeping
-  lineinfile: dest=/usr/share/spamassassin/sa-update.cron state=absent
-              regexp="^sleep"
+  lineinfile:
+    dest: '/usr/share/spamassassin/sa-update.cron'
+    state: 'absent'
+    regexp: "^sleep"
 
 - name: run sa-update for stock channels
-  shell: /usr/share/spamassassin/sa-update.cron
+  shell: '/usr/share/spamassassin/sa-update.cron'
   tags:
-    - sa-update
-  register: saupdate_stock_result
+    - 'sa-update'
+    - 'skip_ansible_lint'
+  register: 'saupdate_stock_result'
   changed_when: "saupdate_stock_result.rc == 0"
   failed_when: "saupdate_stock_result.rc >= 4"
   notify:
-    - run sa-compile
+    - 'run sa-compile'
 
 - name: run sa-update for heinlein channel
-  shell: /usr/bin/sa-update --nogpg --channel spamassassin.heinlein-support.de
+  shell: '/usr/bin/sa-update --nogpg --channel spamassassin.heinlein-support.de'
   tags:
-    - sa-update
-  register: saupdate_heinlein_result
+    - 'sa-update'
+    - 'skip_ansible_lint'
+  register: 'saupdate_heinlein_result'
   changed_when: "saupdate_heinlein_result.rc == 0"
   failed_when: "saupdate_heinlein_result.rc >= 4"
   notify:
-    - run sa-compile
+    - 'run sa-compile'
 
 - name: enable and start spamassassin
-  service: name=spamassassin enabled=yes state=started
+  service:
+    name: 'spamassassin'
+    enabled: yes
+    state: 'started'
   tags:
-    - service
+    - 'service'
 
 - name: enable and start spamass-milter
-  service: name=spamass-milter enabled=yes state=started
+  service:
+    name: 'spamass-milter'
+    enabled: yes
+    state: 'started'
   tags:
-    - service
+    - 'service'

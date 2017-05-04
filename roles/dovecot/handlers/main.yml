@@ -2,4 +2,6 @@
 # file: role/dovecot/handlers/main.yml
 
 - name: reload dovecot
-  action: service name=dovecot state=reloaded
+  service:
+    name: 'dovecot'
+    state: 'reloaded'

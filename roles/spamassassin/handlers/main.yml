@@ -2,8 +2,12 @@
 # file: roles/spamassassin/handlers/main.yml
 
 - name: run sa-compile
-  action: shell /usr/bin/sa-compile
+  shell: '/usr/bin/sa-compile'
   ignore_errors: yes
+  tags:
+    - 'skip_ansible_lint'
 
 - name: restart spamassassin
-  service: name=spamassassin state=restarted
+  service:
+    name: 'spamassassin'
+    state: 'restarted'
